@@ -140,8 +140,4 @@ private class RunHTTPServer extends HTTPServer {
 		super(serverHost, serverPort, requestHandlerClass, bindAndActivate);
 		Sys.print('Serving HTTP on ${serverAddress.host} port ${serverAddress.port} (http://${serverAddress.host}:${serverAddress.port})\n');
 	}
-
-	override private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}):Void {
-		Type.createInstance(requestHandlerClass, [request, clientAddress, this, directory]);
-	}
 }

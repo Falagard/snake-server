@@ -2,3 +2,4 @@
 --main snake.Run
 -cp src
 -lib hxargs
+-lib tink_core

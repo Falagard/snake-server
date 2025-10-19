@@ -1,4 +1,5 @@
 .vscode/
+.haxelib
 bin/
 .DS_Store
 Thumbs.db

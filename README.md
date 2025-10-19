@@ -1,3 +1,7 @@
+# Snake Server with Futures 
+
+This is a modificiation to Snake Server to support asynchronous handling using Tink Future
+
 # Snake Server for Haxe
 
 Create TCP and HTTP servers with the [Haxe](https://haxe.org/) programming language, or run `haxelib run snake-server` to start a local HTTP server that serves static files in a specific directory.

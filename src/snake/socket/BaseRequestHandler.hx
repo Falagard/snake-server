@@ -3,6 +3,8 @@ package snake.socket;
 import sys.net.Host;
 import sys.net.Socket;
 import haxe.Exception;
+import tink.core.Future;
+import tink.core.Noise;
 
 /**
 	Base class for request handler classes.
@@ -19,14 +21,22 @@ class BaseRequestHandler {
 		this.request = request;
 		this.clientAddress = clientAddress;
 		this.server = server;
-		setup();
-		try {
-			handle();
-		} catch (e:Exception) {
+	}
+
+	// instead of running this in the constructor, we have a separate method which returns a Future
+
+	public function processRequest() :Future<Noise> {
+		return Future.irreversible(function(callback) {
+			setup();
+			try {
+				handle();
+			} catch (e:Exception) {
+				finish();
+				throw e;
+			}
 			finish();
-			throw e;
-		}
-		finish();
+			callback(Noise);
+		});
 	}
 
 	private function setup():Void {}

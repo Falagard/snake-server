@@ -1,0 +1,14 @@
+{
+  "dependencies": [
+    {
+      "name": "hxargs",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "tink_core",
+      "type": "haxelib",
+      "version": null
+    }
+  ]
+}

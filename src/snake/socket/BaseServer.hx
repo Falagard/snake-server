@@ -5,6 +5,8 @@ import sys.net.Host;
 import sys.net.Socket;
 import sys.thread.Mutex;
 import sys.thread.Thread;
+import tink.core.Future;
+import tink.core.Noise;
 
 /**
 	Base class for server classes.
@@ -101,17 +103,17 @@ class BaseServer {
 		readable before this function was called, so there should be no risk of
 		blocking in `getRequest()`.
 	**/
-	private function handleRequestNoBlock():Void {
+	private function handleRequestNoBlock():Future<Noise> {
 		var request:Socket = null;
 		try {
 			request = getRequest();
 		} catch (e:Exception) {
-			return;
+			return Future.sync(Noise);
 		}
 		var clientAddress = request.peer();
 		if (verifyRequest(request, clientAddress)) {
 			try {
-				processRequest(request, clientAddress);
+				return processRequest(request, clientAddress);
 			} catch (e:Exception) {
 				handleError(request, clientAddress);
 				shutdownRequest(request);
@@ -119,6 +121,8 @@ class BaseServer {
 		} else {
 			shutdownRequest(request);
 		}
+
+		return Future.sync(Noise);
 	}
 
 	/**
@@ -138,19 +142,26 @@ class BaseServer {
 	/**
 		Call `finishRequest`.
 	**/
-	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}):Void {
+	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}):Future<Noise> {
 		if (threading) {
-			Thread.create(() -> {
-				try {
-					finishRequest(request, clientAddress);
-				} catch (e:Exception) {
-					handleError(request, clientAddress);
-				}
-				shutdownRequest(request);
+			return Future.irreversible(function(callback) {
+				Thread.create(() -> {
+					try {
+						finishRequest(request, clientAddress).handle((_) -> {
+							shutdownRequest(request);
+							callback(Noise);
+						});
+					} catch (e:Exception) {
+						handleError(request, clientAddress);
+						shutdownRequest(request);
+						callback(Noise);
+					}
+				});
 			});
 		} else {
 			finishRequest(request, clientAddress);
 			shutdownRequest(request);
+			return Future.sync(Noise);
 		}
 	}
 
@@ -164,8 +175,9 @@ class BaseServer {
 	/**
 		Finish one request by instantiating `requestHandlerClass`.
 	**/
-	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}):Void {
-		Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
+	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}):Future<Noise> {
+		var handler = Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
+		return handler.processRequest();
 	}
 
 	/**
