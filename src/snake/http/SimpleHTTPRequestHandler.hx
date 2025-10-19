@@ -43,8 +43,6 @@ class SimpleHTTPRequestHandler extends BaseHTTPRequestHandler {
 			throw new Exception("not a directory");
 		}
 		serverVersion = 'SimpleHTTP/${BaseHTTPRequestHandler.getLibraryVersion()}';
-		commandHandlers.set("GET", do_GET);
-		commandHandlers.set("HEAD", do_HEAD);
 	}
 
 	/**

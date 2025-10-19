@@ -57,7 +57,8 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 	**/
 	private var sysVersion:String = 'Haxe/${haxe.macro.Compiler.getDefine("haxe")}';
 
-	private var commandHandlers:Map<String, () -> Void> = [];
+	//removed commandHandlers, instead we'll have 
+	//private var commandHandlers:Map<String, () -> Void> = [];
 	private var command:String;
 	private var path:String;
 	private var closeConnection:Bool = false;
@@ -275,12 +276,9 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 				// An error code has been sent, just exit
 				return;
 			}
-			if (commandHandlers.exists(command)) {
-				commandHandlers.get(command)();
-			} else {
-				sendError(HTTPStatus.NOT_IMPLEMENTED, 'Unsupported method ($command)');
-				return;
-			}
+			// Dispatch the request to the handler method
+			@await handleCommand(command);
+			
 			// actually send the response if not already done.
 			// NOTE: Haxe does not seem to actually flush here!
 			wfile.flush();
@@ -290,6 +288,8 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 			return;
 		}
 	}
+
+	@async private function handleCommand(command:String) {}
 
 	/**
 		Handle multiple requests if necessary.
