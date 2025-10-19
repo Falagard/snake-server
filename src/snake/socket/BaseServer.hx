@@ -7,6 +7,7 @@ import sys.thread.Mutex;
 import sys.thread.Thread;
 import tink.core.Future;
 import tink.core.Noise;
+import tink.await.*;
 
 /**
 	Base class for server classes.
@@ -103,17 +104,17 @@ class BaseServer {
 		readable before this function was called, so there should be no risk of
 		blocking in `getRequest()`.
 	**/
-	private function handleRequestNoBlock():Future<Noise> {
+	 @async private function handleRequestNoBlock() {
 		var request:Socket = null;
 		try {
 			request = getRequest();
 		} catch (e:Exception) {
-			return Future.sync(Noise);
+			return;
 		}
 		var clientAddress = request.peer();
 		if (verifyRequest(request, clientAddress)) {
 			try {
-				return processRequest(request, clientAddress);
+				return @await processRequest(request, clientAddress);
 			} catch (e:Exception) {
 				handleError(request, clientAddress);
 				shutdownRequest(request);
@@ -122,7 +123,7 @@ class BaseServer {
 			shutdownRequest(request);
 		}
 
-		return Future.sync(Noise);
+		return;
 	}
 
 	/**
@@ -142,26 +143,21 @@ class BaseServer {
 	/**
 		Call `finishRequest`.
 	**/
-	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}):Future<Noise> {
+	@async private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
 		if (threading) {
-			return Future.irreversible(function(callback) {
-				Thread.create(() -> {
-					try {
-						finishRequest(request, clientAddress).handle((_) -> {
-							shutdownRequest(request);
-							callback(Noise);
-						});
-					} catch (e:Exception) {
-						handleError(request, clientAddress);
-						shutdownRequest(request);
-						callback(Noise);
-					}
-				});
+			
+			Thread.create(() -> {
+				try {
+					@await finishRequest(request, clientAddress);				
+					shutdownRequest(request);
+				} catch (e:Exception) {
+					handleError(request, clientAddress);
+					shutdownRequest(request);
+				}
 			});
 		} else {
-			finishRequest(request, clientAddress);
+			@await finishRequest(request, clientAddress);
 			shutdownRequest(request);
-			return Future.sync(Noise);
 		}
 	}
 
@@ -175,9 +171,9 @@ class BaseServer {
 	/**
 		Finish one request by instantiating `requestHandlerClass`.
 	**/
-	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}):Future<Noise> {
+	@async private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
 		var handler = Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
-		return handler.processRequest();
+		return @await handler.processRequest();
 	}
 
 	/**

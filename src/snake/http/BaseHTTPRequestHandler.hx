@@ -229,7 +229,7 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 		doc string for information on how to handle specific HTTP
 		commands such as GET and POST.
 	**/
-	private function handleOneRequest():Void {
+	@async private function handleOneRequest():Void {
 		try {
 			var selected = Socket.select([connection], null, null, 5);
 			if (selected.read.length == 0) {
@@ -294,11 +294,11 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 	/**
 		Handle multiple requests if necessary.
 	**/
-	override private function handle():Void {
+	@async override private function handle():Void {
 		closeConnection = true;
-		handleOneRequest();
+		@await handleOneRequest();
 		while (!closeConnection) {
-			handleOneRequest();
+			@await handleOneRequest();
 		}
 	}
 

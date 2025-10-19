@@ -5,6 +5,7 @@ import sys.net.Socket;
 import haxe.Exception;
 import tink.core.Future;
 import tink.core.Noise;
+import tink.await.*;
 
 /**
 	Base class for request handler classes.
@@ -25,23 +26,22 @@ class BaseRequestHandler {
 
 	// instead of running this in the constructor, we have a separate method which returns a Future
 
-	public function processRequest() :Future<Noise> {
-		return Future.irreversible(function(callback) {
+	@async public function processRequest()  {
+		
 			setup();
 			try {
-				handle();
+				@await handle();
 			} catch (e:Exception) {
 				finish();
 				throw e;
 			}
 			finish();
-			callback(Noise);
-		});
+
 	}
 
 	private function setup():Void {}
 
-	private function handle():Void {}
+	@async private function handle():Void {}
 
 	private function finish():Void {}
 }

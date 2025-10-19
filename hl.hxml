@@ -3,3 +3,4 @@
 -cp src
 -lib hxargs
 -lib tink_core
+-lib tink_await
