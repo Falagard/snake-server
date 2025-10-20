@@ -3,9 +3,6 @@ package snake.socket;
 import sys.net.Host;
 import sys.net.Socket;
 import haxe.Exception;
-import tink.core.Future;
-import tink.core.Noise;
-import tink.await.*;
 
 /**
 	Base class for request handler classes.
@@ -26,11 +23,11 @@ class BaseRequestHandler {
 
 	// instead of running this in the constructor, we have a separate method which returns a Future
 
-	@async public function processRequest()  {
+	public function processRequest()  {
 		
 			setup();
 			try {
-				@await handle();
+				handle();
 			} catch (e:Exception) {
 				finish();
 				throw e;
@@ -41,7 +38,7 @@ class BaseRequestHandler {
 
 	private function setup():Void {}
 
-	@async private function handle():Void {}
+	private function handle():Void {}
 
 	private function finish():Void {}
 }

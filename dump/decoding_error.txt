@@ -1,0 +1,2350 @@
+[{
+	access: [APublic]
+	doc: null
+	kind: FFun({
+		args: [{
+			meta: []
+			name: serverHost
+			opt: false
+			type: TPath({
+				name: Host
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}, {
+			meta: []
+			name: serverPort
+			opt: false
+			type: TPath({
+				name: Int
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}, {
+			meta: []
+			name: requestHandlerClass
+			opt: false
+			type: TPath({
+				name: Class
+				pack: []
+				params: [TPType(TPath({
+					name: BaseRequestHandler
+					pack: []
+					params: []
+					sub: null
+				}))]
+				sub: null
+			})
+			value: null
+		}]
+		expr: {
+			expr: EBlock([{
+				expr: EBlock([])
+				pos: #pos
+			}, {
+				expr: EBinop(OpAssign, {
+					expr: EField({
+						expr: EConst(CIdent(this))
+						pos: #pos
+					}, serverAddress, Normal)
+					pos: #pos
+				}, {
+					expr: EObjectDecl([{
+						expr: {
+							expr: EConst(CIdent(serverHost))
+							pos: #pos
+						}
+						field: host
+						quotes: Unquoted
+					}, {
+						expr: {
+							expr: EConst(CIdent(serverPort))
+							pos: #pos
+						}
+						field: port
+						quotes: Unquoted
+					}])
+					pos: #pos
+				})
+				pos: #pos
+			}, {
+				expr: EBinop(OpAssign, {
+					expr: EField({
+						expr: EConst(CIdent(this))
+						pos: #pos
+					}, requestHandlerClass, Normal)
+					pos: #pos
+				}, {
+					expr: EConst(CIdent(requestHandlerClass))
+					pos: #pos
+				})
+				pos: #pos
+			}, {
+				expr: EBinop(OpAssign, {
+					expr: EConst(CIdent(__isShutDown))
+					pos: #pos
+				}, {
+					expr: ENew({
+						name: Mutex
+						pack: []
+						params: []
+						sub: null
+					}, [])
+					pos: #pos
+				})
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: new
+	pos: #pos
+}, {
+	access: [APublic]
+	doc: 
+		A timeout to apply to the request socket, if not `null`.
+	
+	kind: FVar(TPath({
+		name: Null
+		pack: []
+		params: [TPType(TPath({
+			name: Float
+			pack: []
+			params: []
+			sub: null
+		}))]
+		sub: null
+	}), {
+		expr: EConst(CIdent(null))
+		pos: #pos
+	})
+	meta: []
+	name: timeout
+	pos: #pos
+}, {
+	access: [APublic]
+	doc: 
+		Handle each request in a new thread.
+	
+	kind: FVar(TPath({
+		name: Bool
+		pack: []
+		params: []
+		sub: null
+	}), {
+		expr: EConst(CIdent(false))
+		pos: #pos
+	})
+	meta: []
+	name: threading
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: null
+	kind: FVar(TAnonymous([{
+		access: []
+		doc: null
+		kind: FVar(TPath({
+			name: Host
+			pack: []
+			params: []
+			sub: null
+		}), null)
+		meta: []
+		name: host
+		pos: #pos
+	}, {
+		access: []
+		doc: null
+		kind: FVar(TPath({
+			name: Int
+			pack: []
+			params: []
+			sub: null
+		}), null)
+		meta: []
+		name: port
+		pos: #pos
+	}]), null)
+	meta: []
+	name: serverAddress
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: null
+	kind: FVar(TPath({
+		name: Socket
+		pack: []
+		params: []
+		sub: null
+	}), null)
+	meta: []
+	name: socket
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: null
+	kind: FVar(TPath({
+		name: Class
+		pack: []
+		params: [TPType(TPath({
+			name: BaseRequestHandler
+			pack: []
+			params: []
+			sub: null
+		}))]
+		sub: null
+	}), null)
+	meta: []
+	name: requestHandlerClass
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: null
+	kind: FVar(null, {
+		expr: EConst(CIdent(false))
+		pos: #pos
+	})
+	meta: []
+	name: __shutdownRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: null
+	kind: FVar(TPath({
+		name: Mutex
+		pack: []
+		params: []
+		sub: null
+	}), null)
+	meta: []
+	name: __isShutDown
+	pos: #pos
+}, {
+	access: [APublic]
+	doc: 
+		Called by constructor to activate the server.
+
+		May be overridden.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: serverActivate
+	pos: #pos
+}, {
+	access: [APublic]
+	doc: 
+		Handle one request at a time until shutdown.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: pollInterval
+			opt: false
+			type: TPath({
+				name: Float
+				pack: []
+				params: []
+				sub: null
+			})
+			value: {
+				expr: EConst(CFloat(0.5, null))
+				pos: #pos
+			}
+		}]
+		expr: {
+			expr: EBlock([{
+				expr: ECall({
+					expr: EField({
+						expr: EConst(CIdent(__isShutDown))
+						pos: #pos
+					}, acquire, Normal)
+					pos: #pos
+				}, [])
+				pos: #pos
+			}, {
+				expr: ETry({
+					expr: EBlock([{
+						expr: EWhile({
+							expr: EUnop(OpNot, false, {
+								expr: EConst(CIdent(__shutdownRequest))
+								pos: #pos
+							})
+							pos: #pos
+						}, {
+							expr: EBlock([{
+								expr: EVars([{
+									expr: {
+										expr: ECall({
+											expr: EField({
+												expr: EConst(CIdent(Socket))
+												pos: #pos
+											}, select, Normal)
+											pos: #pos
+										}, [{
+											expr: EArrayDecl([{
+												expr: EConst(CIdent(socket))
+												pos: #pos
+											}])
+											pos: #pos
+										}, {
+											expr: EConst(CIdent(null))
+											pos: #pos
+										}, {
+											expr: EConst(CIdent(null))
+											pos: #pos
+										}, {
+											expr: EConst(CIdent(pollInterval))
+											pos: #pos
+										}])
+										pos: #pos
+									}
+									isFinal: false
+									isStatic: false
+									meta: []
+									name: ready
+									namePos: #pos
+									type: null
+								}])
+								pos: #pos
+							}, {
+								expr: EIf({
+									expr: EConst(CIdent(__shutdownRequest))
+									pos: #pos
+								}, {
+									expr: EBlock([{
+										expr: EBreak
+										pos: #pos
+									}])
+									pos: #pos
+								}, null)
+								pos: #pos
+							}, {
+								expr: EIf({
+									expr: EBinop(OpEq, {
+										expr: EField({
+											expr: EField({
+												expr: EConst(CIdent(ready))
+												pos: #pos
+											}, read, Normal)
+											pos: #pos
+										}, length, Normal)
+										pos: #pos
+									}, {
+										expr: EConst(CInt(1, null))
+										pos: #pos
+									})
+									pos: #pos
+								}, {
+									expr: EBlock([{
+										expr: ECall({
+											expr: EConst(CIdent(handleRequestNoBlock))
+											pos: #pos
+										}, [])
+										pos: #pos
+									}])
+									pos: #pos
+								}, null)
+								pos: #pos
+							}, {
+								expr: ECall({
+									expr: EConst(CIdent(serviceActions))
+									pos: #pos
+								}, [])
+								pos: #pos
+							}])
+							pos: #pos
+						}, true)
+						pos: #pos
+					}])
+					pos: #pos
+				}, [{
+					expr: {
+						expr: EBlock([{
+							expr: ECall({
+								expr: EField({
+									expr: EConst(CIdent(__isShutDown))
+									pos: #pos
+								}, release, Normal)
+								pos: #pos
+							}, [])
+							pos: #pos
+						}, {
+							expr: EThrow({
+								expr: EConst(CIdent(e))
+								pos: #pos
+							})
+							pos: #pos
+						}])
+						pos: #pos
+					}
+					name: e
+					type: TPath({
+						name: Exception
+						pack: []
+						params: []
+						sub: null
+					})
+				}])
+				pos: #pos
+			}, {
+				expr: ECall({
+					expr: EField({
+						expr: EConst(CIdent(__isShutDown))
+						pos: #pos
+					}, release, Normal)
+					pos: #pos
+				}, [])
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: serveForever
+	pos: #pos
+}, {
+	access: [APublic]
+	doc: 
+		Stops the `serveForever()` loop.
+
+		Blocks until the loop has finished. This must be called while
+		`serveForever()` is running in another thread, or it will deadlock.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([{
+				expr: EBinop(OpAssign, {
+					expr: EConst(CIdent(__shutdownRequest))
+					pos: #pos
+				}, {
+					expr: EConst(CIdent(true))
+					pos: #pos
+				})
+				pos: #pos
+			}, {
+				expr: ECall({
+					expr: EField({
+						expr: EConst(CIdent(__isShutDown))
+						pos: #pos
+					}, acquire, Normal)
+					pos: #pos
+				}, [])
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: shutdown
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Called by the serveForever() loop.
+
+		May be overridden by a subclass / Mixin to implement any code that
+		needs to be run during the loop.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: serviceActions
+	pos: #pos
+}, {
+	access: [APublic]
+	doc: 
+		Handle one request, possibly blocking.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([{
+				expr: EVars([{
+					expr: {
+						expr: ECall({
+							expr: EField({
+								expr: EConst(CIdent(Socket))
+								pos: #pos
+							}, select, Normal)
+							pos: #pos
+						}, [{
+							expr: EArrayDecl([{
+								expr: EConst(CIdent(socket))
+								pos: #pos
+							}])
+							pos: #pos
+						}, {
+							expr: EConst(CIdent(null))
+							pos: #pos
+						}, {
+							expr: EConst(CIdent(null))
+							pos: #pos
+						}, {
+							expr: EConst(CIdent(timeout))
+							pos: #pos
+						}])
+						pos: #pos
+					}
+					isFinal: false
+					isStatic: false
+					meta: []
+					name: ready
+					namePos: #pos
+					type: null
+				}])
+				pos: #pos
+			}, {
+				expr: EIf({
+					expr: EBinop(OpEq, {
+						expr: EField({
+							expr: EField({
+								expr: EConst(CIdent(ready))
+								pos: #pos
+							}, read, Normal)
+							pos: #pos
+						}, length, Normal)
+						pos: #pos
+					}, {
+						expr: EConst(CInt(1, null))
+						pos: #pos
+					})
+					pos: #pos
+				}, {
+					expr: EBlock([{
+						expr: ECall({
+							expr: EConst(CIdent(handleRequestNoBlock))
+							pos: #pos
+						}, [])
+						pos: #pos
+					}])
+					pos: #pos
+				}, {
+					expr: EBlock([{
+						expr: ECall({
+							expr: EConst(CIdent(handleTimeout))
+							pos: #pos
+						}, [])
+						pos: #pos
+					}])
+					pos: #pos
+				})
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: handleRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Handle one request, without blocking.
+
+		I assume that `Socket.select()` has returned that the socket is
+		readable before this function was called, so there should be no risk of
+		blocking in `getRequest()`.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EReturn({
+				expr: ECall({
+					expr: EField({
+						expr: EField({
+							expr: EField({
+								expr: EConst(CIdent(tink))
+								pos: #pos
+							}, core, Normal)
+							pos: #pos
+						}, Promise, Normal)
+						pos: #pos
+					}, lift, Normal)
+					pos: #pos
+				}, [{
+					expr: ECall({
+						expr: EField({
+							expr: EField({
+								expr: EField({
+									expr: EConst(CIdent(tink))
+									pos: #pos
+								}, core, Normal)
+								pos: #pos
+							}, Future, Normal)
+							pos: #pos
+						}, async, Normal)
+						pos: #pos
+					}, [{
+						expr: EFunction(FAnonymous, {
+							args: [{
+								meta: null
+								name: __return
+								opt: false
+								type: null
+								value: null
+							}]
+							expr: {
+								expr: ETry({
+									expr: EBlock([{
+										expr: EVars([{
+											expr: {
+												expr: EConst(CIdent(null))
+												pos: #pos
+											}
+											isFinal: false
+											isStatic: false
+											meta: []
+											name: request
+											namePos: #pos
+											type: TPath({
+												name: Socket
+												pack: []
+												params: []
+												sub: null
+											})
+										}])
+										pos: #pos
+									}, {
+										expr: EFunction(FNamed(__t0, null), {
+											args: []
+											expr: {
+												expr: EBlock([{
+													expr: EVars([{
+														expr: {
+															expr: ECall({
+																expr: EField({
+																	expr: EConst(CIdent(request))
+																	pos: #pos
+																}, peer, null)
+																pos: #pos
+															}, [])
+															pos: #pos
+														}
+														isFinal: false
+														isStatic: false
+														meta: []
+														name: clientAddress
+														namePos: #pos
+														type: null
+													}])
+													pos: #pos
+												}, {
+													expr: EFunction(FNamed(__t2, null), {
+														args: []
+														expr: {
+															expr: EReturn({
+																expr: ECall({
+																	expr: EConst(CIdent(__return))
+																	pos: #pos
+																}, [{
+																	expr: ECall({
+																		expr: EField({
+																			expr: EField({
+																				expr: EField({
+																					expr: EConst(CIdent(tink))
+																					pos: #pos
+																				}, core, Normal)
+																				pos: #pos
+																			}, Outcome, Normal)
+																			pos: #pos
+																		}, Success, Normal)
+																		pos: #pos
+																	}, [{
+																		expr: null <- expected value
+																		pos: null <- expected value
+																	}])
+																	pos: #pos
+																}])
+																pos: #pos
+															})
+															pos: #pos
+														}
+														params: []
+														ret: null
+													})
+													pos: #pos
+												}, {
+													expr: EIf({
+														expr: ECall({
+															expr: EConst(CIdent(verifyRequest))
+															pos: #pos
+														}, [{
+															expr: EConst(CIdent(request))
+															pos: #pos
+														}, {
+															expr: EConst(CIdent(clientAddress))
+															pos: #pos
+														}])
+														pos: #pos
+													}, {
+														expr: EBlock([{
+															expr: EFunction(FNamed(__t4, null), {
+																args: []
+																expr: {
+																	expr: ECall({
+																		expr: EConst(CIdent(__t2))
+																		pos: #pos
+																	}, [])
+																	pos: #pos
+																}
+																params: []
+																ret: null
+															})
+															pos: #pos
+														}, {
+															expr: EFunction(FNamed(__t6, null), {
+																args: [{
+																	meta: null
+																	name: e
+																	opt: false
+																	type: TPath({
+																		name: Dynamic
+																		pack: []
+																		params: []
+																		sub: null
+																	})
+																	value: null
+																}]
+																expr: {
+																	expr: EReturn({
+																		expr: ETry({
+																			expr: EThrow({
+																				expr: ECall({
+																					expr: EField({
+																						expr: EField({
+																							expr: EField({
+																								expr: EConst(CIdent(tink))
+																								pos: #pos
+																							}, await, Normal)
+																							pos: #pos
+																						}, Error, Normal)
+																						pos: #pos
+																					}, unwrap, Normal)
+																					pos: #pos
+																				}, [{
+																					expr: EConst(CIdent(e))
+																					pos: #pos
+																				}])
+																				pos: #pos
+																			})
+																			pos: #pos
+																		}, [{
+																			expr: {
+																				expr: EBlock([{
+																					expr: ECall({
+																						expr: EConst(CIdent(handleError))
+																						pos: #pos
+																					}, [{
+																						expr: EConst(CIdent(request))
+																						pos: #pos
+																					}, {
+																						expr: EConst(CIdent(clientAddress))
+																						pos: #pos
+																					}])
+																					pos: #pos
+																				}, {
+																					expr: ECall({
+																						expr: EConst(CIdent(shutdownRequest))
+																						pos: #pos
+																					}, [{
+																						expr: EConst(CIdent(request))
+																						pos: #pos
+																					}])
+																					pos: #pos
+																				}, {
+																					expr: ECall({
+																						expr: EConst(CIdent(__t4))
+																						pos: #pos
+																					}, [])
+																					pos: #pos
+																				}])
+																				pos: #pos
+																			}
+																			name: e
+																			type: TPath({
+																				name: Exception
+																				pack: []
+																				params: []
+																				sub: null
+																			})
+																		}])
+																		pos: #pos
+																	})
+																	pos: #pos
+																}
+																params: []
+																ret: null
+															})
+															pos: #pos
+														}, {
+															expr: ETry({
+																expr: ECall({
+																	expr: EField({
+																		expr: ECall({
+																			expr: EConst(CIdent(processRequest))
+																			pos: #pos
+																		}, [{
+																			expr: EConst(CIdent(request))
+																			pos: #pos
+																		}, {
+																			expr: EConst(CIdent(clientAddress))
+																			pos: #pos
+																		}])
+																		pos: #pos
+																	}, handle, Normal)
+																	pos: #pos
+																}, [{
+																	expr: EFunction(null, {
+																		args: [{
+																			meta: null
+																			name: __t7
+																			opt: false
+																			type: null
+																			value: null
+																		}]
+																		expr: {
+																			expr: ETry({
+																				expr: EBlock([{
+																					expr: EVars([{
+																						expr: null
+																						isFinal: false
+																						isStatic: false
+																						meta: []
+																						name: __t7_result
+																						namePos: #pos
+																						type: null
+																					}])
+																					pos: #pos
+																				}, {
+																					expr: ESwitch({
+																						expr: ECall({
+																							expr: EField({
+																								expr: EField({
+																									expr: EField({
+																										expr: EConst(CIdent(tink))
+																										pos: #pos
+																									}, await, Normal)
+																									pos: #pos
+																								}, OutcomeTools, Normal)
+																								pos: #pos
+																							}, getOutcome, Normal)
+																							pos: #pos
+																						}, [{
+																							expr: EConst(CIdent(__t7))
+																							pos: #pos
+																						}])
+																						pos: #pos
+																					}, [{
+																						expr: {
+																							expr: EBlock([{
+																								expr: EBinop(OpAssign, {
+																									expr: EConst(CIdent(__t7_result))
+																									pos: #pos
+																								}, {
+																									expr: EConst(CIdent(v))
+																									pos: #pos
+																								})
+																								pos: #pos
+																							}])
+																							pos: #pos
+																						}
+																						guard: null
+																						values: [{
+																							expr: ECall({
+																								expr: EConst(CIdent(Success))
+																								pos: #pos
+																							}, [{
+																								expr: EConst(CIdent(v))
+																								pos: #pos
+																							}])
+																							pos: #pos
+																						}]
+																					}, {
+																						expr: {
+																							expr: EBlock([{
+																								expr: ECall({
+																									expr: EConst(CIdent(__t6))
+																									pos: #pos
+																								}, [{
+																									expr: EConst(CIdent(e))
+																									pos: #pos
+																								}])
+																								pos: #pos
+																							}, {
+																								expr: EReturn(null)
+																								pos: #pos
+																							}])
+																							pos: #pos
+																						}
+																						guard: null
+																						values: [{
+																							expr: ECall({
+																								expr: EConst(CIdent(Failure))
+																								pos: #pos
+																							}, [{
+																								expr: EConst(CIdent(e))
+																								pos: #pos
+																							}])
+																							pos: #pos
+																						}]
+																					}], null)
+																					pos: #pos
+																				}, {
+																					expr: EReturn({
+																						expr: ECall({
+																							expr: EConst(CIdent(__return))
+																							pos: #pos
+																						}, [{
+																							expr: ECall({
+																								expr: EField({
+																									expr: EField({
+																										expr: EField({
+																											expr: EConst(CIdent(tink))
+																											pos: #pos
+																										}, core, Normal)
+																										pos: #pos
+																									}, Outcome, Normal)
+																									pos: #pos
+																								}, Success, Normal)
+																								pos: #pos
+																							}, [{
+																								expr: EConst(CIdent(__t7_result))
+																								pos: #pos
+																							}])
+																							pos: #pos
+																						}])
+																						pos: #pos
+																					})
+																					pos: #pos
+																				}])
+																				pos: #pos
+																			}, [{
+																				expr: {
+																					expr: ECall({
+																						expr: EConst(CIdent(__t6))
+																						pos: #pos
+																					}, [{
+																						expr: EConst(CIdent(e))
+																						pos: #pos
+																					}])
+																					pos: #pos
+																				}
+																				name: e
+																				type: TPath({
+																					name: Dynamic
+																					pack: []
+																					params: []
+																					sub: null
+																				})
+																			}])
+																			pos: #pos
+																		}
+																		params: []
+																		ret: null
+																	})
+																	pos: #pos
+																}])
+																pos: #pos
+															}, [{
+																expr: {
+																	expr: ECall({
+																		expr: EConst(CIdent(__t6))
+																		pos: #pos
+																	}, [{
+																		expr: EConst(CIdent(e))
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}
+																name: e
+																type: TPath({
+																	name: Dynamic
+																	pack: []
+																	params: []
+																	sub: null
+																})
+															}])
+															pos: #pos
+														}])
+														pos: #pos
+													}, {
+														expr: EBlock([{
+															expr: ECall({
+																expr: EConst(CIdent(shutdownRequest))
+																pos: #pos
+															}, [{
+																expr: EConst(CIdent(request))
+																pos: #pos
+															}])
+															pos: #pos
+														}, {
+															expr: ECall({
+																expr: EConst(CIdent(__t2))
+																pos: #pos
+															}, [])
+															pos: #pos
+														}])
+														pos: #pos
+													})
+													pos: #pos
+												}])
+												pos: #pos
+											}
+											params: []
+											ret: null
+										})
+										pos: #pos
+									}, {
+										expr: EFunction(FNamed(__t8, null), {
+											args: [{
+												meta: null
+												name: e
+												opt: false
+												type: TPath({
+													name: Dynamic
+													pack: []
+													params: []
+													sub: null
+												})
+												value: null
+											}]
+											expr: {
+												expr: EReturn({
+													expr: ETry({
+														expr: EThrow({
+															expr: ECall({
+																expr: EField({
+																	expr: EField({
+																		expr: EField({
+																			expr: EConst(CIdent(tink))
+																			pos: #pos
+																		}, await, Normal)
+																		pos: #pos
+																	}, Error, Normal)
+																	pos: #pos
+																}, unwrap, Normal)
+																pos: #pos
+															}, [{
+																expr: EConst(CIdent(e))
+																pos: #pos
+															}])
+															pos: #pos
+														})
+														pos: #pos
+													}, [{
+														expr: {
+															expr: EBlock([{
+																expr: EReturn({
+																	expr: ECall({
+																		expr: EConst(CIdent(__return))
+																		pos: #pos
+																	}, [{
+																		expr: ECall({
+																			expr: EField({
+																				expr: EField({
+																					expr: EField({
+																						expr: EConst(CIdent(tink))
+																						pos: #pos
+																					}, core, Normal)
+																					pos: #pos
+																				}, Outcome, Normal)
+																				pos: #pos
+																			}, Success, Normal)
+																			pos: #pos
+																		}, [{
+																			expr: null <- expected value
+																			pos: null <- expected value
+																		}])
+																		pos: #pos
+																	}])
+																	pos: #pos
+																})
+																pos: #pos
+															}, {
+																expr: ECall({
+																	expr: EConst(CIdent(__t0))
+																	pos: #pos
+																}, [])
+																pos: #pos
+															}])
+															pos: #pos
+														}
+														name: e
+														type: TPath({
+															name: Exception
+															pack: []
+															params: []
+															sub: null
+														})
+													}])
+													pos: #pos
+												})
+												pos: #pos
+											}
+											params: []
+											ret: null
+										})
+										pos: #pos
+									}, {
+										expr: ETry({
+											expr: EBlock([{
+												expr: EBinop(OpAssign, {
+													expr: EConst(CIdent(request))
+													pos: #pos
+												}, {
+													expr: ECall({
+														expr: EConst(CIdent(getRequest))
+														pos: #pos
+													}, [])
+													pos: #pos
+												})
+												pos: #pos
+											}, {
+												expr: ECall({
+													expr: EConst(CIdent(__t0))
+													pos: #pos
+												}, [])
+												pos: #pos
+											}])
+											pos: #pos
+										}, [{
+											expr: {
+												expr: ECall({
+													expr: EConst(CIdent(__t8))
+													pos: #pos
+												}, [{
+													expr: EConst(CIdent(e))
+													pos: #pos
+												}])
+												pos: #pos
+											}
+											name: e
+											type: TPath({
+												name: Dynamic
+												pack: []
+												params: []
+												sub: null
+											})
+										}])
+										pos: #pos
+									}])
+									pos: #pos
+								}, [{
+									expr: {
+										expr: ECall({
+											expr: EConst(CIdent(__return))
+											pos: #pos
+										}, [{
+											expr: ECall({
+												expr: EField({
+													expr: EField({
+														expr: EField({
+															expr: EConst(CIdent(tink))
+															pos: #pos
+														}, core, Normal)
+														pos: #pos
+													}, Outcome, Normal)
+													pos: #pos
+												}, Failure, Normal)
+												pos: #pos
+											}, [{
+												expr: EConst(CIdent(e))
+												pos: #pos
+											}])
+											pos: #pos
+										}])
+										pos: #pos
+									}
+									name: e
+									type: TPath({
+										name: Dynamic
+										pack: []
+										params: []
+										sub: null
+									})
+								}])
+								pos: #pos
+							}
+							params: []
+							ret: null
+						})
+						pos: #pos
+					}])
+					pos: #pos
+				}])
+				pos: #pos
+			})
+			pos: #pos
+		}
+		params: []
+		ret: null
+	})
+	meta: [{
+		name: async
+		params: []
+		pos: #pos
+	}]
+	name: handleRequestNoBlock
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Called if no new request arrives within `timeout`.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: handleTimeout
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Verify the request.  May be overridden.
+
+		@return true if we should proceed with this request.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: request
+			opt: false
+			type: TPath({
+				name: Socket
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}, {
+			meta: []
+			name: clientAddress
+			opt: false
+			type: TAnonymous([{
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Host
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: host
+				pos: #pos
+			}, {
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Int
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: port
+				pos: #pos
+			}])
+			value: null
+		}]
+		expr: {
+			expr: EBlock([{
+				expr: EReturn({
+					expr: EConst(CIdent(true))
+					pos: #pos
+				})
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Bool
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: verifyRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Call `finishRequest`.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: request
+			opt: false
+			type: TPath({
+				name: Socket
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}, {
+			meta: []
+			name: clientAddress
+			opt: false
+			type: TAnonymous([{
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Host
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: host
+				pos: #pos
+			}, {
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Int
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: port
+				pos: #pos
+			}])
+			value: null
+		}]
+		expr: {
+			expr: EReturn({
+				expr: ECall({
+					expr: EField({
+						expr: EField({
+							expr: EField({
+								expr: EConst(CIdent(tink))
+								pos: #pos
+							}, core, Normal)
+							pos: #pos
+						}, Promise, Normal)
+						pos: #pos
+					}, lift, Normal)
+					pos: #pos
+				}, [{
+					expr: ECall({
+						expr: EField({
+							expr: EField({
+								expr: EField({
+									expr: EConst(CIdent(tink))
+									pos: #pos
+								}, core, Normal)
+								pos: #pos
+							}, Future, Normal)
+							pos: #pos
+						}, async, Normal)
+						pos: #pos
+					}, [{
+						expr: EFunction(FAnonymous, {
+							args: [{
+								meta: null
+								name: __return
+								opt: false
+								type: null
+								value: null
+							}]
+							expr: {
+								expr: ETry({
+									expr: EIf({
+										expr: EConst(CIdent(threading))
+										pos: #pos
+									}, {
+										expr: ECall({
+											expr: EField({
+												expr: EConst(CIdent(Thread))
+												pos: #pos
+											}, create, null)
+											pos: #pos
+										}, [{
+											expr: EFunction(FArrow, {
+												args: []
+												expr: {
+													expr: EMeta({
+														name: :implicitReturn
+														params: []
+														pos: #pos
+													}, {
+														expr: EReturn({
+															expr: EBlock([{
+																expr: ETry({
+																	expr: EBlock([{
+																		expr: EMeta({
+																			name: await
+																			params: []
+																			pos: #pos
+																		}, {
+																			expr: ECall({
+																				expr: EConst(CIdent(finishRequest))
+																				pos: #pos
+																			}, [{
+																				expr: EConst(CIdent(request))
+																				pos: #pos
+																			}, {
+																				expr: EConst(CIdent(clientAddress))
+																				pos: #pos
+																			}])
+																			pos: #pos
+																		})
+																		pos: #pos
+																	}, {
+																		expr: ECall({
+																			expr: EConst(CIdent(shutdownRequest))
+																			pos: #pos
+																		}, [{
+																			expr: EConst(CIdent(request))
+																			pos: #pos
+																		}])
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}, [{
+																	expr: {
+																		expr: EBlock([{
+																			expr: ECall({
+																				expr: EConst(CIdent(handleError))
+																				pos: #pos
+																			}, [{
+																				expr: EConst(CIdent(request))
+																				pos: #pos
+																			}, {
+																				expr: EConst(CIdent(clientAddress))
+																				pos: #pos
+																			}])
+																			pos: #pos
+																		}, {
+																			expr: ECall({
+																				expr: EConst(CIdent(shutdownRequest))
+																				pos: #pos
+																			}, [{
+																				expr: EConst(CIdent(request))
+																				pos: #pos
+																			}])
+																			pos: #pos
+																		}])
+																		pos: #pos
+																	}
+																	name: e
+																	type: TPath({
+																		name: Exception
+																		pack: []
+																		params: []
+																		sub: null
+																	})
+																}])
+																pos: #pos
+															}])
+															pos: #pos
+														})
+														pos: #pos
+													})
+													pos: #pos
+												}
+												params: []
+												ret: null
+											})
+											pos: #pos
+										}])
+										pos: #pos
+									}, {
+										expr: ECall({
+											expr: EField({
+												expr: ECall({
+													expr: EConst(CIdent(finishRequest))
+													pos: #pos
+												}, [{
+													expr: EConst(CIdent(request))
+													pos: #pos
+												}, {
+													expr: EConst(CIdent(clientAddress))
+													pos: #pos
+												}])
+												pos: #pos
+											}, handle, Normal)
+											pos: #pos
+										}, [{
+											expr: EFunction(null, {
+												args: [{
+													meta: null
+													name: __t11
+													opt: false
+													type: null
+													value: null
+												}]
+												expr: {
+													expr: ETry({
+														expr: EBlock([{
+															expr: EVars([{
+																expr: null
+																isFinal: false
+																isStatic: false
+																meta: []
+																name: __t11_result
+																namePos: #pos
+																type: null
+															}])
+															pos: #pos
+														}, {
+															expr: ESwitch({
+																expr: ECall({
+																	expr: EField({
+																		expr: EField({
+																			expr: EField({
+																				expr: EConst(CIdent(tink))
+																				pos: #pos
+																			}, await, Normal)
+																			pos: #pos
+																		}, OutcomeTools, Normal)
+																		pos: #pos
+																	}, getOutcome, Normal)
+																	pos: #pos
+																}, [{
+																	expr: EConst(CIdent(__t11))
+																	pos: #pos
+																}])
+																pos: #pos
+															}, [{
+																expr: {
+																	expr: EBlock([{
+																		expr: EBinop(OpAssign, {
+																			expr: EConst(CIdent(__t11_result))
+																			pos: #pos
+																		}, {
+																			expr: EConst(CIdent(v))
+																			pos: #pos
+																		})
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}
+																guard: null
+																values: [{
+																	expr: ECall({
+																		expr: EConst(CIdent(Success))
+																		pos: #pos
+																	}, [{
+																		expr: EConst(CIdent(v))
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}]
+															}, {
+																expr: {
+																	expr: EBlock([{
+																		expr: ECall({
+																			expr: EConst(CIdent(__return))
+																			pos: #pos
+																		}, [{
+																			expr: ECall({
+																				expr: EField({
+																					expr: EField({
+																						expr: EField({
+																							expr: EConst(CIdent(tink))
+																							pos: #pos
+																						}, core, Normal)
+																						pos: #pos
+																					}, Outcome, Normal)
+																					pos: #pos
+																				}, Failure, Normal)
+																				pos: #pos
+																			}, [{
+																				expr: EConst(CIdent(e))
+																				pos: #pos
+																			}])
+																			pos: #pos
+																		}])
+																		pos: #pos
+																	}, {
+																		expr: EReturn(null)
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}
+																guard: null
+																values: [{
+																	expr: ECall({
+																		expr: EConst(CIdent(Failure))
+																		pos: #pos
+																	}, [{
+																		expr: EConst(CIdent(e))
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}]
+															}], null)
+															pos: #pos
+														}, {
+															expr: EBlock([{
+																expr: EConst(CIdent(__t11_result))
+																pos: #pos
+															}, {
+																expr: ECall({
+																	expr: EConst(CIdent(shutdownRequest))
+																	pos: #pos
+																}, [{
+																	expr: EConst(CIdent(request))
+																	pos: #pos
+																}])
+																pos: #pos
+															}])
+															pos: #pos
+														}])
+														pos: #pos
+													}, [{
+														expr: {
+															expr: ECall({
+																expr: EConst(CIdent(__return))
+																pos: #pos
+															}, [{
+																expr: ECall({
+																	expr: EField({
+																		expr: EField({
+																			expr: EField({
+																				expr: EConst(CIdent(tink))
+																				pos: #pos
+																			}, core, Normal)
+																			pos: #pos
+																		}, Outcome, Normal)
+																		pos: #pos
+																	}, Failure, Normal)
+																	pos: #pos
+																}, [{
+																	expr: EConst(CIdent(e))
+																	pos: #pos
+																}])
+																pos: #pos
+															}])
+															pos: #pos
+														}
+														name: e
+														type: TPath({
+															name: Dynamic
+															pack: []
+															params: []
+															sub: null
+														})
+													}])
+													pos: #pos
+												}
+												params: []
+												ret: null
+											})
+											pos: #pos
+										}])
+										pos: #pos
+									})
+									pos: #pos
+								}, [{
+									expr: {
+										expr: ECall({
+											expr: EConst(CIdent(__return))
+											pos: #pos
+										}, [{
+											expr: ECall({
+												expr: EField({
+													expr: EField({
+														expr: EField({
+															expr: EConst(CIdent(tink))
+															pos: #pos
+														}, core, Normal)
+														pos: #pos
+													}, Outcome, Normal)
+													pos: #pos
+												}, Failure, Normal)
+												pos: #pos
+											}, [{
+												expr: EConst(CIdent(e))
+												pos: #pos
+											}])
+											pos: #pos
+										}])
+										pos: #pos
+									}
+									name: e
+									type: TPath({
+										name: Dynamic
+										pack: []
+										params: []
+										sub: null
+									})
+								}])
+								pos: #pos
+							}
+							params: []
+							ret: null
+						})
+						pos: #pos
+					}])
+					pos: #pos
+				}])
+				pos: #pos
+			})
+			pos: #pos
+		}
+		params: []
+		ret: null
+	})
+	meta: [{
+		name: async
+		params: []
+		pos: #pos
+	}]
+	name: processRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Called to clean-up the server.
+
+		May be overridden.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: serverClose
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Finish one request by instantiating `requestHandlerClass`.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: request
+			opt: false
+			type: TPath({
+				name: Socket
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}, {
+			meta: []
+			name: clientAddress
+			opt: false
+			type: TAnonymous([{
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Host
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: host
+				pos: #pos
+			}, {
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Int
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: port
+				pos: #pos
+			}])
+			value: null
+		}]
+		expr: {
+			expr: EReturn({
+				expr: ECall({
+					expr: EField({
+						expr: EField({
+							expr: EField({
+								expr: EConst(CIdent(tink))
+								pos: #pos
+							}, core, Normal)
+							pos: #pos
+						}, Promise, Normal)
+						pos: #pos
+					}, lift, Normal)
+					pos: #pos
+				}, [{
+					expr: ECall({
+						expr: EField({
+							expr: EField({
+								expr: EField({
+									expr: EConst(CIdent(tink))
+									pos: #pos
+								}, core, Normal)
+								pos: #pos
+							}, Future, Normal)
+							pos: #pos
+						}, async, Normal)
+						pos: #pos
+					}, [{
+						expr: EFunction(FAnonymous, {
+							args: [{
+								meta: null
+								name: __return
+								opt: false
+								type: null
+								value: null
+							}]
+							expr: {
+								expr: ETry({
+									expr: EBlock([{
+										expr: EVars([{
+											expr: {
+												expr: ECall({
+													expr: EField({
+														expr: EConst(CIdent(Type))
+														pos: #pos
+													}, createInstance, null)
+													pos: #pos
+												}, [{
+													expr: EConst(CIdent(requestHandlerClass))
+													pos: #pos
+												}, {
+													expr: EArrayDecl([{
+														expr: EConst(CIdent(request))
+														pos: #pos
+													}, {
+														expr: EConst(CIdent(clientAddress))
+														pos: #pos
+													}, {
+														expr: EConst(CIdent(this))
+														pos: #pos
+													}])
+													pos: #pos
+												}])
+												pos: #pos
+											}
+											isFinal: false
+											isStatic: false
+											meta: []
+											name: handler
+											namePos: #pos
+											type: null
+										}])
+										pos: #pos
+									}, {
+										expr: ECall({
+											expr: EField({
+												expr: ECall({
+													expr: EField({
+														expr: EConst(CIdent(handler))
+														pos: #pos
+													}, processRequest, null)
+													pos: #pos
+												}, [])
+												pos: #pos
+											}, handle, Normal)
+											pos: #pos
+										}, [{
+											expr: EFunction(null, {
+												args: [{
+													meta: null
+													name: __t12
+													opt: false
+													type: null
+													value: null
+												}]
+												expr: {
+													expr: ETry({
+														expr: EBlock([{
+															expr: EVars([{
+																expr: null
+																isFinal: false
+																isStatic: false
+																meta: []
+																name: __t12_result
+																namePos: #pos
+																type: null
+															}])
+															pos: #pos
+														}, {
+															expr: ESwitch({
+																expr: ECall({
+																	expr: EField({
+																		expr: EField({
+																			expr: EField({
+																				expr: EConst(CIdent(tink))
+																				pos: #pos
+																			}, await, Normal)
+																			pos: #pos
+																		}, OutcomeTools, Normal)
+																		pos: #pos
+																	}, getOutcome, Normal)
+																	pos: #pos
+																}, [{
+																	expr: EConst(CIdent(__t12))
+																	pos: #pos
+																}])
+																pos: #pos
+															}, [{
+																expr: {
+																	expr: EBlock([{
+																		expr: EBinop(OpAssign, {
+																			expr: EConst(CIdent(__t12_result))
+																			pos: #pos
+																		}, {
+																			expr: EConst(CIdent(v))
+																			pos: #pos
+																		})
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}
+																guard: null
+																values: [{
+																	expr: ECall({
+																		expr: EConst(CIdent(Success))
+																		pos: #pos
+																	}, [{
+																		expr: EConst(CIdent(v))
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}]
+															}, {
+																expr: {
+																	expr: EBlock([{
+																		expr: ECall({
+																			expr: EConst(CIdent(__return))
+																			pos: #pos
+																		}, [{
+																			expr: ECall({
+																				expr: EField({
+																					expr: EField({
+																						expr: EField({
+																							expr: EConst(CIdent(tink))
+																							pos: #pos
+																						}, core, Normal)
+																						pos: #pos
+																					}, Outcome, Normal)
+																					pos: #pos
+																				}, Failure, Normal)
+																				pos: #pos
+																			}, [{
+																				expr: EConst(CIdent(e))
+																				pos: #pos
+																			}])
+																			pos: #pos
+																		}])
+																		pos: #pos
+																	}, {
+																		expr: EReturn(null)
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}
+																guard: null
+																values: [{
+																	expr: ECall({
+																		expr: EConst(CIdent(Failure))
+																		pos: #pos
+																	}, [{
+																		expr: EConst(CIdent(e))
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}]
+															}], null)
+															pos: #pos
+														}, {
+															expr: EReturn({
+																expr: ECall({
+																	expr: EConst(CIdent(__return))
+																	pos: #pos
+																}, [{
+																	expr: ECall({
+																		expr: EField({
+																			expr: EField({
+																				expr: EField({
+																					expr: EConst(CIdent(tink))
+																					pos: #pos
+																				}, core, Normal)
+																				pos: #pos
+																			}, Outcome, Normal)
+																			pos: #pos
+																		}, Success, Normal)
+																		pos: #pos
+																	}, [{
+																		expr: EConst(CIdent(__t12_result))
+																		pos: #pos
+																	}])
+																	pos: #pos
+																}])
+																pos: #pos
+															})
+															pos: #pos
+														}])
+														pos: #pos
+													}, [{
+														expr: {
+															expr: ECall({
+																expr: EConst(CIdent(__return))
+																pos: #pos
+															}, [{
+																expr: ECall({
+																	expr: EField({
+																		expr: EField({
+																			expr: EField({
+																				expr: EConst(CIdent(tink))
+																				pos: #pos
+																			}, core, Normal)
+																			pos: #pos
+																		}, Outcome, Normal)
+																		pos: #pos
+																	}, Failure, Normal)
+																	pos: #pos
+																}, [{
+																	expr: EConst(CIdent(e))
+																	pos: #pos
+																}])
+																pos: #pos
+															}])
+															pos: #pos
+														}
+														name: e
+														type: TPath({
+															name: Dynamic
+															pack: []
+															params: []
+															sub: null
+														})
+													}])
+													pos: #pos
+												}
+												params: []
+												ret: null
+											})
+											pos: #pos
+										}])
+										pos: #pos
+									}])
+									pos: #pos
+								}, [{
+									expr: {
+										expr: ECall({
+											expr: EConst(CIdent(__return))
+											pos: #pos
+										}, [{
+											expr: ECall({
+												expr: EField({
+													expr: EField({
+														expr: EField({
+															expr: EConst(CIdent(tink))
+															pos: #pos
+														}, core, Normal)
+														pos: #pos
+													}, Outcome, Normal)
+													pos: #pos
+												}, Failure, Normal)
+												pos: #pos
+											}, [{
+												expr: EConst(CIdent(e))
+												pos: #pos
+											}])
+											pos: #pos
+										}])
+										pos: #pos
+									}
+									name: e
+									type: TPath({
+										name: Dynamic
+										pack: []
+										params: []
+										sub: null
+									})
+								}])
+								pos: #pos
+							}
+							params: []
+							ret: null
+						})
+						pos: #pos
+					}])
+					pos: #pos
+				}])
+				pos: #pos
+			})
+			pos: #pos
+		}
+		params: []
+		ret: null
+	})
+	meta: [{
+		name: async
+		params: []
+		pos: #pos
+	}]
+	name: finishRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Called to shutdown and close an individual request.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: request
+			opt: false
+			type: TPath({
+				name: Socket
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}]
+		expr: {
+			expr: EBlock([])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: shutdownRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Called to clean up an individual request.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: request
+			opt: false
+			type: TPath({
+				name: Socket
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}]
+		expr: {
+			expr: EBlock([])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: closeRequest
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Handle an error gracefully.  May be overridden.
+
+		The default is to print a traceback and continue.
+	
+	kind: FFun({
+		args: [{
+			meta: []
+			name: request
+			opt: false
+			type: TPath({
+				name: Socket
+				pack: []
+				params: []
+				sub: null
+			})
+			value: null
+		}, {
+			meta: []
+			name: clientAddress
+			opt: false
+			type: TAnonymous([{
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Host
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: host
+				pos: #pos
+			}, {
+				access: []
+				doc: null
+				kind: FVar(TPath({
+					name: Int
+					pack: []
+					params: []
+					sub: null
+				}), null)
+				meta: []
+				name: port
+				pos: #pos
+			}])
+			value: null
+		}]
+		expr: {
+			expr: EBlock([{
+				expr: ECall({
+					expr: EField({
+						expr: EConst(CIdent(Sys))
+						pos: #pos
+					}, print, Normal)
+					pos: #pos
+				}, [{
+					expr: EConst(CString(Exception occurred during processing of request from ${clientAddress.host.toString()}:${clientAddress.port}
+, SingleQuotes))
+					pos: #pos
+				}])
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Void
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: handleError
+	pos: #pos
+}, {
+	access: [APrivate]
+	doc: 
+		Get the request and client address from the socket.
+
+		May be overridden.
+	
+	kind: FFun({
+		args: []
+		expr: {
+			expr: EBlock([{
+				expr: EReturn({
+					expr: EConst(CIdent(null))
+					pos: #pos
+				})
+				pos: #pos
+			}])
+			pos: #pos
+		}
+		params: []
+		ret: TPath({
+			name: Socket
+			pack: []
+			params: []
+			sub: null
+		})
+	})
+	meta: []
+	name: getRequest
+	pos: #pos
+}]
+line 685: expected value
+line 686: expected value
+line 1087: expected value
+line 1088: expected value

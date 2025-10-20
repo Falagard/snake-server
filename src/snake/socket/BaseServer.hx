@@ -5,9 +5,6 @@ import sys.net.Host;
 import sys.net.Socket;
 import sys.thread.Mutex;
 import sys.thread.Thread;
-import tink.core.Future;
-import tink.core.Noise;
-import tink.await.*;
 
 /**
 	Base class for server classes.
@@ -148,6 +145,8 @@ class BaseServer {
 			
 			Thread.create(() -> {
 				try {
+					//this needs to be something like var f = @await finishRequest(request, clientAddress);
+					//f.map 
 					@await finishRequest(request, clientAddress);				
 					shutdownRequest(request);
 				} catch (e:Exception) {

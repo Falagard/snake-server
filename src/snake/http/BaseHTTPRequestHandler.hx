@@ -230,7 +230,7 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 		doc string for information on how to handle specific HTTP
 		commands such as GET and POST.
 	**/
-	@async private function handleOneRequest():Void {
+	private function handleOneRequest():Void {
 		try {
 			var selected = Socket.select([connection], null, null, 5);
 			if (selected.read.length == 0) {
@@ -277,7 +277,7 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 				return;
 			}
 			// Dispatch the request to the handler method
-			@await handleCommand(command);
+			handleCommand(command);
 			
 			// actually send the response if not already done.
 			// NOTE: Haxe does not seem to actually flush here!
@@ -289,16 +289,16 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 		}
 	}
 
-	@async private function handleCommand(command:String) {}
+	private function handleCommand(command:String) {}
 
 	/**
 		Handle multiple requests if necessary.
 	**/
-	@async override private function handle():Void {
+	override private function handle():Void {
 		closeConnection = true;
-		@await handleOneRequest();
+		handleOneRequest();
 		while (!closeConnection) {
-			@await handleOneRequest();
+			handleOneRequest();
 		}
 	}
 
