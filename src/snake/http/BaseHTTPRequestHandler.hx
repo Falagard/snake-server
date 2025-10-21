@@ -93,8 +93,6 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 	**/
 	private function parseRequest():Bool {
 
-		trace("parseRequest called at " + Sys.time());
-
 		command = null;
 		var version = DEFAULT_REQUEST_VERSION;
 		requestVersion = DEFAULT_REQUEST_VERSION;
@@ -127,16 +125,12 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 					throw new Exception("too many . separators in http version");
 				}
 
-                trace("parseRequest lamda at " + Sys.time());
-
 				if (Lambda.exists(versionNumber, component -> !~/^\d+$/.match(component))) {
 					throw new Exception("non digit in http version");
 				}
 				if (Lambda.exists(versionNumber, component -> component.length > 10)) {
 					throw new Exception("unreasonable length http version");
 				}
-
-                trace("parseRequest lamda complete at " + Sys.time());
 
 				parsedVersionNumber = [Std.parseInt(versionNumber[0]), Std.parseInt(versionNumber[1])];
 			} catch (e:Exception) {
@@ -181,8 +175,6 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 			path = '/' + EREG_LEADING_SLASHES.matched(1);
 		}
 
-        trace("parseRequest parseHeaders at " + Sys.time());
-
 		// Examine the headers and look for a Connection directive.
 		try {
 			headers = HeaderParser.parseHeaders(rfile);
@@ -191,8 +183,6 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 			sendError(HTTPStatus.REQUEST_HEADER_FIELDS_TOO_LARGE, "Line too long or too many headers");
 			return false;
 		}
-
-        trace("parseRequest parseHeaders complete at " + Sys.time());
 
 		var connType = headers.get('Connection');
 		if (connType == null) {
@@ -214,8 +204,6 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 				return false;
 			}
 		}
-
-        trace("parseRequest completed at " + Sys.time());
 
 		return true;
 	}
@@ -535,11 +523,9 @@ private class HeaderParser {
 	private static final MAX_LINE = 65536;
 
 	public static function parseHeaders(input:Input):Map<String, String> {
-        trace("parseHeaders at " + Sys.time());
+        
 		var headers = readHeaders(input);
-        trace("parseHeaders readHeaders complete at " + Sys.time());
 		var result = parseHeaderLines(headers); 
-        trace("parseHeaders parseHeaderLines complete at " + Sys.time());
         return result;
 
 

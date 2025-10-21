@@ -169,11 +169,8 @@ class BaseServer {
 		Finish one request by instantiating `requestHandlerClass`.
 	**/
 	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
-        trace("finishRequest called at " + Sys.time() );
 		var handler = Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
-        trace("finishRequest created handler at " + Sys.time() );
         handler.processRequest();
-        trace("finishRequest completed at " + Sys.time());
 	}
 
 	/**
