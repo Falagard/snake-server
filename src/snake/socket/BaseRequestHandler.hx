@@ -25,9 +25,12 @@ class BaseRequestHandler {
 
 	public function processRequest()  {
 		
+            trace("processRequest called at " + Sys.time() );
 			setup();
+            trace("processRequest setup completed at " + Sys.time() );
 			try {
 				handle();
+                trace("processRequest handle completed at " + Sys.time() );
 			} catch (e:Exception) {
 				finish();
 				throw e;

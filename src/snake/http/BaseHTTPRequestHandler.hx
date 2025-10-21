@@ -92,6 +92,9 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 		error response has already been sent back.
 	**/
 	private function parseRequest():Bool {
+
+		trace("parseRequest called at " + Sys.time());
+
 		command = null;
 		var version = DEFAULT_REQUEST_VERSION;
 		requestVersion = DEFAULT_REQUEST_VERSION;
@@ -123,12 +126,18 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 				if (versionNumber.length != 2) {
 					throw new Exception("too many . separators in http version");
 				}
+
+                trace("parseRequest lamda at " + Sys.time());
+
 				if (Lambda.exists(versionNumber, component -> !~/^\d+$/.match(component))) {
 					throw new Exception("non digit in http version");
 				}
 				if (Lambda.exists(versionNumber, component -> component.length > 10)) {
 					throw new Exception("unreasonable length http version");
 				}
+
+                trace("parseRequest lamda complete at " + Sys.time());
+
 				parsedVersionNumber = [Std.parseInt(versionNumber[0]), Std.parseInt(versionNumber[1])];
 			} catch (e:Exception) {
 				sendError(HTTPStatus.BAD_REQUEST, 'Bad request version (${version})');
@@ -172,13 +181,18 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 			path = '/' + EREG_LEADING_SLASHES.matched(1);
 		}
 
+        trace("parseRequest parseHeaders at " + Sys.time());
+
 		// Examine the headers and look for a Connection directive.
 		try {
 			headers = HeaderParser.parseHeaders(rfile);
 		} catch (e:Exception) {
+            trace("parseRequest exception " + Sys.time());
 			sendError(HTTPStatus.REQUEST_HEADER_FIELDS_TOO_LARGE, "Line too long or too many headers");
 			return false;
 		}
+
+        trace("parseRequest parseHeaders complete at " + Sys.time());
 
 		var connType = headers.get('Connection');
 		if (connType == null) {
@@ -200,6 +214,8 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 				return false;
 			}
 		}
+
+        trace("parseRequest completed at " + Sys.time());
 
 		return true;
 	}
@@ -230,64 +246,49 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 		doc string for information on how to handle specific HTTP
 		commands such as GET and POST.
 	**/
-	private function handleOneRequest():Void {
-		try {
-			var selected = Socket.select([connection], null, null, 5);
-			if (selected.read.length == 0) {
-				closeConnection = true;
-				return;
-			}
-			rawRequestLine = "";
-			var lineLength = 0;
-			var char:String = null;
-			// can't seem to rely on Haxe socket input readLine() because it
-			// sometimes blocks until the connection is dropped, even if
-			// Socket.select() says that the socket is ready to read.
-			try {
-				while (true) {
-					char = rfile.readString(1);
-					if (char == "\r") {
-						continue;
-					} else if (char == "\n") {
-						break;
-					} else {
-						rawRequestLine += char;
-						if (lineLength > MAX_LINE) {
-							break;
-						}
-					}
-				}
-			} catch (e:Eof) {
-				closeConnection = true;
-				return;
-			}
-			if (lineLength > MAX_LINE) {
-				requestLine = '';
-				requestVersion = '';
-				command = '';
-				sendError(HTTPStatus.REQUEST_URI_TOO_LONG);
-				return;
-			}
-			if (rawRequestLine.length == 0) {
-				closeConnection = true;
-				return;
-			}
-			if (!parseRequest()) {
-				// An error code has been sent, just exit
-				return;
-			}
-			// Dispatch the request to the handler method
-			handleCommand(command);
-			
-			// actually send the response if not already done.
-			// NOTE: Haxe does not seem to actually flush here!
-			wfile.flush();
-		} catch (e:Exception) {
-			logError("Unknown exception: " + e.toString());
-			closeConnection = true;
-			return;
-		}
-	}
+	// ...existing code...
+    private function handleOneRequest():Void {
+        try {
+            var selected = Socket.select([connection], null, null, 5);
+            if (selected.read.length == 0) {
+                closeConnection = true;
+                return;
+            }
+            rawRequestLine = "";
+            // Use readLine() for efficiency
+            try {
+                rawRequestLine = rfile.readLine();
+            } catch (e:Eof) {
+                closeConnection = true;
+                return;
+            }
+            if (rawRequestLine == null || rawRequestLine.length == 0) {
+                closeConnection = true;
+                return;
+            }
+            if (rawRequestLine.length > MAX_LINE) {
+                requestLine = '';
+                requestVersion = '';
+                command = '';
+                sendError(HTTPStatus.REQUEST_URI_TOO_LONG);
+                return;
+            }
+            if (!parseRequest()) {
+                // An error code has been sent, just exit
+                return;
+            }
+            // Dispatch the request to the handler method
+            handleCommand(command);
+            
+            // actually send the response if not already done.
+            // NOTE: Haxe does not seem to actually flush here!
+            wfile.flush();
+        } catch (e:Exception) {
+            logError("Unknown exception: " + e.toString());
+            closeConnection = true;
+            return;
+        }
+    }
 
 	private function handleCommand(command:String) {}
 
@@ -534,43 +535,36 @@ private class HeaderParser {
 	private static final MAX_LINE = 65536;
 
 	public static function parseHeaders(input:Input):Map<String, String> {
+        trace("parseHeaders at " + Sys.time());
 		var headers = readHeaders(input);
-		return parseHeaderLines(headers);
+        trace("parseHeaders readHeaders complete at " + Sys.time());
+		var result = parseHeaderLines(headers); 
+        trace("parseHeaders parseHeaderLines complete at " + Sys.time());
+        return result;
+
+
 	}
 
 	private static function readHeaders(input:Input):Array<String> {
-		var headers:Array<String> = [];
-		while (true) {
-			var line = "";
-			var lineLength = 0;
-			var char:String = null;
-			while (true) {
-				char = input.readString(1);
-				if (char == "\r") {
-					continue;
-				} else if (char == "\n") {
-					break;
-				} else {
-					line += char;
-					lineLength++;
-					if (lineLength > MAX_LINE) {
-						break;
-					}
-				}
-			}
-			if (lineLength > MAX_LINE) {
-				throw new Exception("header line too long");
-			}
-			headers.push(line);
-			if (headers.length > MAX_HEADERS) {
-				throw new Exception('got more than ${MAX_HEADERS} headers');
-			}
-			if (line == "\r\n" || line == "\n" || line == "") {
-				break;
-			}
-		}
-		return headers;
-	}
+        var headers:Array<String> = [];
+        var line:String;
+        var count = 0;
+        while (true) {
+            // Use readLine() if possible, else fallback to manual read
+            try {
+                line = input.readLine();
+            } catch (e:Eof) {
+                break;
+            }
+            if (line == null) break;
+            if (line.length > MAX_LINE) throw new Exception("header line too long");
+            headers.push(line);
+            count++;
+            if (count > MAX_HEADERS) throw new Exception('got more than ${MAX_HEADERS} headers');
+            if (line == "") break; // End of headers
+        }
+        return headers;
+    }
 
 	private static function parseHeaderLines(headers:Array<String>):Map<String, String> {
 		var result:Map<String, String> = [];
