@@ -5,6 +5,7 @@ import sys.net.Host;
 import sys.net.Socket;
 import sys.thread.Mutex;
 import sys.thread.Thread;
+import snake.util.ThreadPool;
 
 /**
 	Base class for server classes.
@@ -14,6 +15,8 @@ class BaseServer {
 		A timeout to apply to the request socket, if not `null`.
 	**/
 	public var timeout:Null<Float> = null;
+
+    private var threadPool:ThreadPool;
 
 	/**
 		Handle each request in a new thread.
@@ -26,10 +29,11 @@ class BaseServer {
 	private var __shutdownRequest = false;
 	private var __isShutDown:Mutex;
 
-	public function new(serverHost:Host, serverPort:Int, requestHandlerClass:Class<BaseRequestHandler>) {
+	public function new(serverHost:Host, serverPort:Int, requestHandlerClass:Class<BaseRequestHandler>, ?threadCount:Int = 8) {
 		this.serverAddress = {host: serverHost, port: serverPort};
 		this.requestHandlerClass = requestHandlerClass;
 		__isShutDown = new Mutex();
+        threadPool = new ThreadPool(threadCount);
 	}
 
 	/**
@@ -142,17 +146,17 @@ class BaseServer {
 	**/
 	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
 		if (threading) {
-			
-			Thread.create(() -> {
-				try {
-					finishRequest(request, clientAddress);				
-					shutdownRequest(request);
-				} catch (e:Exception) {
-					handleError(request, clientAddress);
-					shutdownRequest(request);
-				}
-			});
-		} else {
+            threadPool.submit(() -> {
+                try {
+                    finishRequest(request, clientAddress);
+                    shutdownRequest(request);
+                } catch (e:Exception) {
+                    handleError(request, clientAddress);
+                    shutdownRequest(request);
+                }
+            });
+        }
+        else {
 			finishRequest(request, clientAddress);
 			shutdownRequest(request);
 		}
@@ -163,7 +167,9 @@ class BaseServer {
 
 		May be overridden.
 	**/
-	private function serverClose():Void {}
+	private function serverClose():Void {
+        threadPool.shutdown();
+    }
 
 	/**
 		Finish one request by instantiating `requestHandlerClass`.
@@ -176,7 +182,8 @@ class BaseServer {
 	/**
 		Called to shutdown and close an individual request.
 	**/
-	private function shutdownRequest(request:Socket):Void {}
+	private function shutdownRequest(request:Socket):Void {
+    }
 
 	/**
 		Called to clean up an individual request.
