@@ -101,7 +101,7 @@ class BaseServer {
 		readable before this function was called, so there should be no risk of
 		blocking in `getRequest()`.
 	**/
-	 @async private function handleRequestNoBlock() {
+	private function handleRequestNoBlock() {
 		var request:Socket = null;
 		try {
 			request = getRequest();
@@ -111,7 +111,7 @@ class BaseServer {
 		var clientAddress = request.peer();
 		if (verifyRequest(request, clientAddress)) {
 			try {
-				return @await processRequest(request, clientAddress);
+				return processRequest(request, clientAddress);
 			} catch (e:Exception) {
 				handleError(request, clientAddress);
 				shutdownRequest(request);
@@ -140,14 +140,12 @@ class BaseServer {
 	/**
 		Call `finishRequest`.
 	**/
-	@async private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
+	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
 		if (threading) {
 			
 			Thread.create(() -> {
 				try {
-					//this needs to be something like var f = @await finishRequest(request, clientAddress);
-					//f.map 
-					@await finishRequest(request, clientAddress);				
+					finishRequest(request, clientAddress);				
 					shutdownRequest(request);
 				} catch (e:Exception) {
 					handleError(request, clientAddress);
@@ -155,7 +153,7 @@ class BaseServer {
 				}
 			});
 		} else {
-			@await finishRequest(request, clientAddress);
+			finishRequest(request, clientAddress);
 			shutdownRequest(request);
 		}
 	}
@@ -170,9 +168,9 @@ class BaseServer {
 	/**
 		Finish one request by instantiating `requestHandlerClass`.
 	**/
-	@async private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
+	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
 		var handler = Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
-		return @await handler.processRequest();
+		return handler.processRequest();
 	}
 
 	/**
