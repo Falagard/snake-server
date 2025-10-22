@@ -75,7 +75,6 @@ class TCPServer extends BaseServer {
 		Called to shutdown and close an individual request.
 	**/
 	override private function shutdownRequest(request:Socket):Void {
-        //trace("shutdownRequest start at " + Sys.time());
 		// commented out because it results in an exception that doesn't
 		// seem to be caught
 		try {

@@ -157,8 +157,6 @@ class BaseServer {
 		Call `finishRequest`.
 	**/
 	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
-        //var id = Std.random(1000000);
-        //trace("processRequest start at " + Sys.time() + " (Request ID: " + id + ")");
 		if (threading) {
             threadPool.submit(() -> {
                 try {
@@ -174,7 +172,6 @@ class BaseServer {
 			finishRequest(request, clientAddress);
 			shutdownRequest(request);
 		}
-        //trace("processRequest end at " + Sys.time() + " (Request ID: " + id + ")");
 	}
 
 	/**
@@ -191,13 +188,8 @@ class BaseServer {
 	**/
 	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
 
-        var id = Std.random(1000000);
-        var start = Sys.time();
-        trace("finishRequest start (Request ID: " + id + ")");
 		var handler = Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
         handler.processRequest();
-        var complete = Sys.time();
-        trace("finishRequest end in " + (complete - start) + " (Request ID: " + id + ")");
 	}
 
 	/**
