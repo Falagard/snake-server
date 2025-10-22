@@ -28,6 +28,7 @@ class BaseServer {
 	private var requestHandlerClass:Class<BaseRequestHandler>;
 	private var __shutdownRequest = false;
 	private var __isShutDown:Mutex;
+    public var requestHandled:Bool = false;
 
 	public function new(serverHost:Host, serverPort:Int, requestHandlerClass:Class<BaseRequestHandler>, ?threadCount:Int = 8) {
 		this.serverAddress = {host: serverHost, port: serverPort};
@@ -90,12 +91,14 @@ class BaseServer {
 		Handle one request, possibly blocking.
 	**/
 	public function handleRequest():Void {
-		var ready = Socket.select([socket], null, null, timeout);
-		if (ready.read.length == 1) {
+        requestHandled = false;
+        //SideWinder not using Socket.select 
+		//var ready = Socket.select([socket], null, null, timeout);
+		//if (ready.read.length == 1) {
 			handleRequestNoBlock();
-		} else {
-			handleTimeout();
-		}
+		//} else {
+		//	handleTimeout();
+		//}
 	}
 
 	/**
@@ -112,10 +115,19 @@ class BaseServer {
 		} catch (e:Exception) {
 			return;
 		}
-		var clientAddress = request.peer();
+
+        //sanity check in case getRequest returned null
+        if(request == null) {
+            return;
+        }
+		//var clientAddress = request.peer();
+        //can't call request.peer here because the socket might not be ready yet
+        var clientAddress = { host: new Host("0.0.0.0"), port: 0}
 		if (verifyRequest(request, clientAddress)) {
 			try {
-				return processRequest(request, clientAddress);
+				processRequest(request, clientAddress);
+                requestHandled = true;
+                return;
 			} catch (e:Exception) {
 				handleError(request, clientAddress);
 				shutdownRequest(request);
@@ -145,6 +157,8 @@ class BaseServer {
 		Call `finishRequest`.
 	**/
 	private function processRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
+        //var id = Std.random(1000000);
+        //trace("processRequest start at " + Sys.time() + " (Request ID: " + id + ")");
 		if (threading) {
             threadPool.submit(() -> {
                 try {
@@ -160,6 +174,7 @@ class BaseServer {
 			finishRequest(request, clientAddress);
 			shutdownRequest(request);
 		}
+        //trace("processRequest end at " + Sys.time() + " (Request ID: " + id + ")");
 	}
 
 	/**
@@ -175,8 +190,14 @@ class BaseServer {
 		Finish one request by instantiating `requestHandlerClass`.
 	**/
 	private function finishRequest(request:Socket, clientAddress:{host:Host, port:Int}) {
+
+        var id = Std.random(1000000);
+        var start = Sys.time();
+        trace("finishRequest start (Request ID: " + id + ")");
 		var handler = Type.createInstance(requestHandlerClass, [request, clientAddress, this]);
         handler.processRequest();
+        var complete = Sys.time();
+        trace("finishRequest end in " + (complete - start) + " (Request ID: " + id + ")");
 	}
 
 	/**

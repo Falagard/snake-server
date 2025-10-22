@@ -50,6 +50,7 @@ class TCPServer extends BaseServer {
 	**/
 	override public function serverActivate():Void {
 		socket.listen(requestQueueSize);
+        socket.setBlocking(false);
 	}
 
 	/**
@@ -74,15 +75,17 @@ class TCPServer extends BaseServer {
 		Called to shutdown and close an individual request.
 	**/
 	override private function shutdownRequest(request:Socket):Void {
+        //trace("shutdownRequest start at " + Sys.time());
 		// commented out because it results in an exception that doesn't
 		// seem to be caught
-		/*try {
-				// explicitly shutdown.  socket.close() merely releases
-				// the socket and waits for GC to perform the actual close.
-				request.shutdown(false, true);
-			} catch (e:Exception) {
-				// some platforms may raise ENOTCONN here
-		}*/
+		try {
+            // explicitly shutdown.  socket.close() merely releases
+            // the socket and waits for GC to perform the actual close.
+            request.shutdown(true, true);
+        } catch (e:Exception) {
+            // some platforms may raise ENOTCONN here
+            trace("Error shutting down request socket: " + Std.string(e));
+		}
 		closeRequest(request);
 	}
 
@@ -92,6 +95,8 @@ class TCPServer extends BaseServer {
 	override private function closeRequest(request:Socket):Void {
 		try {
 			request.close();
-		} catch (e:Exception) {}
+		} catch (e:Exception) {
+            trace("Error closing request socket: " + Std.string(e));
+        }
 	}
 }

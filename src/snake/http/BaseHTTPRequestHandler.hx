@@ -5,6 +5,7 @@ import haxe.Json;
 import haxe.io.Eof;
 import haxe.io.Input;
 import haxe.io.Path;
+import haxe.io.Error;
 import snake.socket.BaseServer;
 import snake.socket.StreamRequestHandler;
 import sys.io.File;
@@ -237,19 +238,34 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 	// ...existing code...
     private function handleOneRequest():Void {
         try {
-            var selected = Socket.select([connection], null, null, 5);
-            if (selected.read.length == 0) {
-                closeConnection = true;
-                return;
-            }
+            //SideWinder not sure why Socket.select was called here because it was already called previously
+            // var selected = Socket.select([connection], null, null, 5);
+            // if (selected.read.length == 0) {
+            //     closeConnection = true;
+            //     return;
+            // }
+            
+            //we are now not blocking, readLine may throw Eof if no data, we'll loop until ready
             rawRequestLine = "";
-            // Use readLine() for efficiency
-            try {
-                rawRequestLine = rfile.readLine();
-            } catch (e:Eof) {
-                closeConnection = true;
-                return;
+
+            while(true) {
+                // Use readLine() for efficiency
+                try {
+                    rawRequestLine = rfile.readLine();
+                    break;
+                } catch (e:Eof) {
+                    closeConnection = true;
+                    return;
+                } catch(e:Error) {
+                    //no data yet, return and try again later
+                    if(e.match(Error.Blocked)) {
+                        continue;
+                    } else {
+                        return;
+                    }
+                }
             }
+                
             if (rawRequestLine == null || rawRequestLine.length == 0) {
                 closeConnection = true;
                 return;
@@ -405,6 +421,7 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 	private function flushHeaders():Void {
 		if (headersBuffer != null && headersBuffer.length > 0) {
 			wfile.writeString(headersBuffer);
+            //connection.write(headersBuffer);
 			headersBuffer = "";
 		}
 	}

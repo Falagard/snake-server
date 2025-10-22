@@ -50,7 +50,9 @@ class StreamRequestHandler extends BaseRequestHandler {
 		} catch (e:Exception) {
 			// A final socket error may have occurred here, such as
 			// the local error ECONNABORTED.
+            trace('Error flushing socket output: ${e}');
 		}
-		connection.close();
+        //Clay - removed connection.close since it is handled by TcpServer
+        //connection.close();
 	}
 }
