@@ -244,7 +244,7 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 	// ...existing code...
     private function handleOneRequest():Void {
         try {
-            //SideWinder not sure why Socket.select was called here because it was already called previously
+            //No longer blocking, we'll loop until we have data
             // var selected = Socket.select([connection], null, null, 5);
             // if (selected.read.length == 0) {
             //     closeConnection = true;
@@ -256,25 +256,9 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 
             var startTime = Sys.time();
 
-            // while(true) {
-            //     // Use readLine() for efficiency
-            //     try {
-            //         rawRequestLine = rfile.readLine();
-            //         break;
-            //     } catch (e:Eof) {
-            //         closeConnection = true;
-            //         return;
-            //     } catch(e:Error) {
-            //         //no data yet, return and try again later
-            //         if(e.match(Error.Blocked)) {
-            //             continue;
-            //         } else {
-            //             return;
-            //         }
-            //     }
-            // }
-
             //this needs more work for http 1.1 keep alive connections
+            //specifically, for persistent connections, this function, handleOneRequest, gets repeatedly until we set closeConnection = true
+            //but there's a bug where this gets stuck 
 
             while(true) {
                 

@@ -92,13 +92,9 @@ class BaseServer {
 	**/
 	public function handleRequest():Void {
         requestHandled = false;
-        //SideWinder not using Socket.select 
+        //No longer blocking, we'll loop until we have data
 		//var ready = Socket.select([socket], null, null, timeout);
-		//if (ready.read.length == 1) {
-			handleRequestNoBlock();
-		//} else {
-		//	handleTimeout();
-		//}
+		handleRequestNoBlock();
 	}
 
 	/**
