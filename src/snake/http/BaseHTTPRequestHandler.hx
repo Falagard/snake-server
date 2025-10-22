@@ -180,10 +180,16 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 		try {
 			headers = HeaderParser.parseHeaders(rfile);
 		} catch (e:Exception) {
-            trace("parseRequest exception " + Sys.time());
+            logError("parseRequest exception " + Sys.time());
 			sendError(HTTPStatus.REQUEST_HEADER_FIELDS_TOO_LARGE, "Line too long or too many headers");
 			return false;
 		}
+
+        //log the headers
+        for( key in headers.keys()) {
+            var value = headers.get(key);
+            logMessage('${key}: ${value}');
+        }
 
 		var connType = headers.get('Connection');
 		if (connType == null) {
@@ -248,28 +254,64 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
             //we are now not blocking, readLine may throw Eof if no data, we'll loop until ready
             rawRequestLine = "";
 
+            var startTime = Sys.time();
+
+            // while(true) {
+            //     // Use readLine() for efficiency
+            //     try {
+            //         rawRequestLine = rfile.readLine();
+            //         break;
+            //     } catch (e:Eof) {
+            //         closeConnection = true;
+            //         return;
+            //     } catch(e:Error) {
+            //         //no data yet, return and try again later
+            //         if(e.match(Error.Blocked)) {
+            //             continue;
+            //         } else {
+            //             return;
+            //         }
+            //     }
+            // }
+
             while(true) {
+                
                 // Use readLine() for efficiency
                 try {
                     rawRequestLine = rfile.readLine();
                     break;
                 } catch (e:Eof) {
-                    closeConnection = true;
+                    // Check for timeout
+                    if (Sys.time() - startTime > 5) {
+                        logError("Request read timeout (5 seconds)");
+                        closeConnection = true;
+                        return;
+                    }
                     return;
                 } catch(e:Error) {
                     //no data yet, return and try again later
                     if(e.match(Error.Blocked)) {
+
+                        if (Sys.time() - startTime > 5) {
+                            logError("Request read timeout (5 seconds)");
+                            closeConnection = true;
+                            return;
+                        }
+
                         continue;
                     } else {
                         return;
                     }
                 }
             }
-                
+              
             if (rawRequestLine == null || rawRequestLine.length == 0) {
                 closeConnection = true;
                 return;
             }
+
+            logMessage(rawRequestLine);
+
             if (rawRequestLine.length > MAX_LINE) {
                 requestLine = '';
                 requestVersion = '';
@@ -384,6 +426,7 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
 			if (headersBuffer == null) {
 				headersBuffer = "";
 			}
+
 			headersBuffer += '${protocolVersion} ${status.code} ${message}\r\n';
 		}
 	}
