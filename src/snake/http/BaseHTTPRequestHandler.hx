@@ -274,6 +274,8 @@ class BaseHTTPRequestHandler extends StreamRequestHandler {
             //     }
             // }
 
+            //this needs more work for http 1.1 keep alive connections
+
             while(true) {
                 
                 // Use readLine() for efficiency
