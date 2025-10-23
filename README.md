@@ -2,7 +2,8 @@
 
 This is a fork of https://github.com/BowlerHatLLC/snake-server with some improvements, including a thread pool, and changes to make it non-blocking on the main thread. 
 
-Most of the changes revolve around using socket.setBlocking(false) and then reading from the input in a loop in handleOneRequest
+Most of the changes revolve around using socket.setBlocking(false) and then reading from the input in a loop in handleOneRequest, and this version of snake-server is specifically built to be the basis for [SideWinder](https://github.com/Falagard/SideWinder/)
+
 
 Create TCP and HTTP servers with the [Haxe](https://haxe.org/) programming language, or run `haxelib run snake-server` to start a local HTTP server that serves static files in a specific directory.
 
